@@ -1,13 +1,12 @@
 from django.contrib import admin
 from unfold.admin import ModelAdmin
-from users.models import User
+from users.models import User, Word
 
 
 @admin.register(User)
 class UserAdmin(ModelAdmin):
     list_display = (
         "username",
-        "email",
         "full_name",
         "is_active",
         "is_staff",
@@ -17,19 +16,24 @@ class UserAdmin(ModelAdmin):
         "is_staff",
     )
     fields = (
-        "first_name",
-        "last_name",
+        "full_name",
         "username",
-        "email",
         "is_active",
         "is_staff",
     )
     search_fields = (
-        "first_name",
-        "last_name",
+        "full_name",
         "username",
-        "email",
         "id",
     )
 
+    list_filter_submit = True
+
+
+@admin.register(Word)
+class WordAdmin(ModelAdmin):
+    list_display = ("front", "back", "pronunciation", "user", "is_favorite",)
+    fields = list_display
+    search_fields = list_display + ("id",)
+    list_filter = ("is_favorite",)
     list_filter_submit = True
