@@ -1,0 +1,5 @@
+Django==5.0.1
+django-unfold==0.19.0
+environs==10.0.0
+psycopg2-binary==2.9.9
+djangorestframework==3.14.0

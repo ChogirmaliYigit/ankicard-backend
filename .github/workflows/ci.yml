@@ -1,0 +1,52 @@
+name: edu-backend
+
+on:
+  # Runs on pushes targeting the default branch
+  push:
+    branches: [ '**' ]
+
+  # Allows you to run this workflow manually from the Actions tab
+  workflow_dispatch:
+
+# Allow one concurrent deployment
+concurrency:
+  group: ${{ github.ref_name }}
+  cancel-in-progress: ${{ github.ref_name != 'main'}}
+
+jobs:
+  backend-lint:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      - name: Set up Python 3.11
+        uses: actions/setup-python@v3
+        with:
+          python-version: 3.11.*
+      - name: Install pycodestyle
+        run: pip install pycodestyle==2.5.0
+      - name: Lint backend
+        run: pycodestyle . --ignore=E501,W504,W503 --exclude=migrations
+
+# TODO: write tests for backend
+#  backend-test:
+#    runs-on: ubuntu-latest
+#    services:
+#      postgres:
+#        env:
+#          POSTGRES_USER: postgres
+#          POSTGRES_PASSWORD: postgres
+#          POSTGRES_DB: postgres
+#        image: postgres:15.2-alpine
+#        ports:
+#          - 5432:5432
+#        options: --health-cmd pg_isready --health-interval 10s --health-timeout 5s --health-retries 5
+#    steps:
+#      - uses: actions/checkout@v1
+#      - name: Set up Python 3.11
+#        uses: actions/setup-python@v1
+#        with:
+#          python-version: 3.11.*
+#      - name: Install dependencies
+#        run: pip install -r backend/requirements.txt
+#      - name: Django Testing project
+#        run: cd backend && python3 manage.py test
