@@ -14,10 +14,12 @@ from users.serializers import UserSerializer, WordDetailSerializer, WordListSeri
 class UserRegistrationView(generics.CreateAPIView):
     serializer_class = UserSerializer
     permission_classes = [permissions.AllowAny]
+    authentication_classes = []
 
 
 class UserLoginView(APIView):
     permission_classes = [permissions.AllowAny]
+    authentication_classes = []
 
     def post(self, request):
         user = User.objects.filter(
