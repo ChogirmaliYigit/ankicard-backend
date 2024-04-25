@@ -1,12 +1,13 @@
-from datetime import date
+from datetime import date, timedelta
 
 from dateutil.relativedelta import relativedelta
+from django.conf import settings
 from django.shortcuts import get_object_or_404
+from django.utils import timezone
 from rest_framework import generics, permissions, status
-from rest_framework.authtoken.models import Token
 from rest_framework.response import Response
 from rest_framework.views import APIView
-from users.models import User, Word
+from users.models import CustomToken, User, Word
 from users.serializers import UserSerializer, WordDetailSerializer, WordListSerializer
 
 
@@ -23,7 +24,11 @@ class UserLoginView(APIView):
             username=request.data["username"], password=request.data["password"]
         ).first()
         if user:
-            token, created = Token.objects.get_or_create(user=user)
+            token, created = CustomToken.objects.get_or_create(
+                user=user,
+                expires_at=timezone.now()
+                + timedelta(days=settings.DEFAULT_TOKEN_EXPIRE_DAYS),
+            )
             return Response(
                 {"token": token.key, "user": UserSerializer(instance=user).data}
             )

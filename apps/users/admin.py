@@ -1,6 +1,6 @@
 from django.contrib import admin
 from unfold.admin import ModelAdmin
-from users.models import User, Word
+from users.models import CustomToken, User, Word
 
 
 @admin.register(User)
@@ -43,3 +43,19 @@ class WordAdmin(ModelAdmin):
     search_fields = list_display + ("id",)
     list_filter = ("is_favorite",)
     list_filter_submit = True
+
+
+@admin.register(CustomToken)
+class CustomTokenAdmin(ModelAdmin):
+    list_display = (
+        "key",
+        "user",
+        "created",
+        "expires_at",
+    )
+    fields = (
+        "key",
+        "user",
+        "expires_at",
+    )
+    search_fields = list_display

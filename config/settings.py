@@ -52,7 +52,6 @@ INSTALLED_APPS = [
     "django.contrib.messages",
     "django.contrib.staticfiles",
     "rest_framework",
-    "rest_framework.authtoken",
     "drf_standardized_errors",
     "drf_yasg",
     "core",
@@ -157,7 +156,7 @@ UNFOLD = {
 
 REST_FRAMEWORK = {
     "DEFAULT_AUTHENTICATION_CLASSES": [
-        "rest_framework.authentication.TokenAuthentication",
+        "users.authentication.CustomTokenAuthentication",
     ],
     "DEFAULT_PERMISSION_CLASSES": [
         "rest_framework.permissions.IsAuthenticated",
@@ -165,6 +164,8 @@ REST_FRAMEWORK = {
     "NON_FIELD_ERRORS_KEY": "error",
     "EXCEPTION_HANDLER": "drf_standardized_errors.handler.exception_handler",
 }
+
+DEFAULT_TOKEN_EXPIRE_DAYS = 30
 
 DRF_STANDARDIZED_ERRORS = {
     "EXCEPTION_HANDLER_CLASS": "drf_standardized_errors.handler.ExceptionHandler",

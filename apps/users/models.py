@@ -1,5 +1,12 @@
+from datetime import timedelta
+
+from django.conf import settings
 from django.contrib.auth.models import AbstractBaseUser, PermissionsMixin
 from django.db import models
+from django.db.models.signals import post_save
+from django.dispatch import receiver
+from django.utils import timezone
+from rest_framework.authtoken.models import Token
 
 from apps.core.models import BaseModel
 from apps.users.queryset.user import UserManager
@@ -29,3 +36,22 @@ class Word(BaseModel):
 
     class Meta:
         db_table = "words"
+
+
+class CustomToken(Token):
+    expires_at = models.DateTimeField(
+        default=timezone.now() + timedelta(days=settings.DEFAULT_TOKEN_EXPIRE_DAYS)
+    )
+
+    class Meta:
+        db_table = "custom_tokens"
+
+
+@receiver(post_save, sender=User)
+def create_auth_token(sender, instance=None, created=False, **kwargs):
+    if created:
+        CustomToken.objects.create(
+            user=instance,
+            expires_at=timezone.now()
+            + timedelta(days=settings.DEFAULT_TOKEN_EXPIRE_DAYS),
+        )
