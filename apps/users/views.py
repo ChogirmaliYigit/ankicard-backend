@@ -1,12 +1,13 @@
 from datetime import date
+
 from dateutil.relativedelta import relativedelta
+from django.shortcuts import get_object_or_404
+from rest_framework import generics, permissions, status
 from rest_framework.authtoken.models import Token
 from rest_framework.response import Response
 from rest_framework.views import APIView
-from rest_framework import generics, permissions, status
-from django.shortcuts import get_object_or_404
-from users.serializers import UserSerializer, WordListSerializer, WordDetailSerializer
 from users.models import User, Word
+from users.serializers import UserSerializer, WordDetailSerializer, WordListSerializer
 
 
 class UserRegistrationView(generics.CreateAPIView):
@@ -18,12 +19,16 @@ class UserLoginView(APIView):
     permission_classes = [permissions.AllowAny]
 
     def post(self, request):
-        user = User.objects.filter(username=request.data['username'], password=request.data['password']).first()
+        user = User.objects.filter(
+            username=request.data["username"], password=request.data["password"]
+        ).first()
         if user:
             token, created = Token.objects.get_or_create(user=user)
-            return Response({'token': token.key, "user": UserSerializer(instance=user).data})
+            return Response(
+                {"token": token.key, "user": UserSerializer(instance=user).data}
+            )
         else:
-            return Response({'error': 'Username or password is invalid'}, status=401)
+            return Response({"error": "Username or password is invalid"}, status=401)
 
 
 class WordListView(APIView):
@@ -32,10 +37,14 @@ class WordListView(APIView):
     def get_queryset(self, request):
         queryset = request.user.words.all()
         is_favorite = request.query_params.get("is_favorite", None)
-        start_date = request.query_params.get("start_date", date.today() - relativedelta(months=6))
+        start_date = request.query_params.get(
+            "start_date", date.today() - relativedelta(months=6)
+        )
         end_date = request.query_params.get("end_date", date.today())
         if start_date:
-            queryset = queryset.filter(created_at__date__gte=start_date, created_at__date__lte=end_date)
+            queryset = queryset.filter(
+                created_at__date__gte=start_date, created_at__date__lte=end_date
+            )
         if is_favorite:
             queryset = queryset.filter(is_favorite=is_favorite == "true")
         return queryset
@@ -45,7 +54,9 @@ class WordListView(APIView):
         return Response(serializer.data, status.HTTP_200_OK)
 
     def post(self, request):
-        serializer = self.serializer_class(data=request.data, context={"request": request})
+        serializer = self.serializer_class(
+            data=request.data, context={"request": request}
+        )
         serializer.is_valid(raise_exception=True)
         serializer.save()
         return Response({}, status.HTTP_201_CREATED)

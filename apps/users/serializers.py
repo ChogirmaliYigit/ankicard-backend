@@ -8,7 +8,11 @@ class UserSerializer(serializers.ModelSerializer):
 
     def to_representation(self, instance):
         token, created = Token.objects.get_or_create(user=instance)
-        return {"token": token.key, "user": instance}
+        return {
+            "token": token.key,
+            "username": instance.username,
+            "full_name": instance.full_name,
+        }
 
     class Meta:
         model = User
@@ -29,7 +33,12 @@ class WordListSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Word
-        fields = ("front", "back", "pronunciation", "is_favorite",)
+        fields = (
+            "front",
+            "back",
+            "pronunciation",
+            "is_favorite",
+        )
 
 
 class WordDetailSerializer(serializers.ModelSerializer):
@@ -40,4 +49,9 @@ class WordDetailSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Word
-        fields = ("front", "back", "pronunciation", "is_favorite",)
+        fields = (
+            "front",
+            "back",
+            "pronunciation",
+            "is_favorite",
+        )

@@ -32,7 +32,13 @@ class UserAdmin(ModelAdmin):
 
 @admin.register(Word)
 class WordAdmin(ModelAdmin):
-    list_display = ("front", "back", "pronunciation", "user", "is_favorite",)
+    list_display = (
+        "front",
+        "back",
+        "pronunciation",
+        "user",
+        "is_favorite",
+    )
     fields = list_display
     search_fields = list_display + ("id",)
     list_filter = ("is_favorite",)
