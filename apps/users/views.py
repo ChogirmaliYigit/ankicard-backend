@@ -1,13 +1,13 @@
-from datetime import date, timedelta
+from datetime import date
 
 from dateutil.relativedelta import relativedelta
-from django.conf import settings
+from django.contrib.auth import authenticate
 from django.shortcuts import get_object_or_404
-from django.utils import timezone
-from rest_framework import generics, permissions, status
+from drf_yasg import openapi, utils
+from rest_framework import generics, permissions, status, validators
 from rest_framework.response import Response
 from rest_framework.views import APIView
-from users.models import CustomToken, User, Word
+from users.models import Word
 from users.serializers import UserSerializer, WordDetailSerializer, WordListSerializer
 
 
@@ -21,22 +21,35 @@ class UserLoginView(APIView):
     permission_classes = [permissions.AllowAny]
     authentication_classes = []
 
+    @utils.swagger_auto_schema(
+        request_body=openapi.Schema(
+            type=openapi.TYPE_OBJECT,
+            required=["username", "password"],
+            properties={
+                "username": openapi.Schema(type=openapi.TYPE_STRING),
+                "password": openapi.Schema(
+                    type=openapi.TYPE_STRING, format=openapi.FORMAT_PASSWORD
+                ),
+            },
+        ),
+        responses={
+            status.HTTP_200_OK: UserSerializer,
+            status.HTTP_400_BAD_REQUEST: "Invalid input",
+        },
+        security=[
+            {
+                "TokenAuthentication": [],
+            }
+        ],
+    )
     def post(self, request):
-        user = User.objects.filter(
+        user = authenticate(
             username=request.data.get("username"),
             password=request.data.get("password"),
-        ).first()
-        if user:
-            token, created = CustomToken.objects.get_or_create(
-                user=user,
-                expires_at=timezone.now()
-                + timedelta(days=settings.DEFAULT_TOKEN_EXPIRE_DAYS),
-            )
-            return Response(
-                {"token": token.key, "user": UserSerializer(instance=user).data}
-            )
-        else:
-            return Response({"error": "Username or password is invalid"}, status=401)
+        )
+        if not user:
+            raise validators.ValidationError("Username or password is invalid")
+        return Response(UserSerializer(instance=user).data, status.HTTP_200_OK)
 
 
 class WordListView(APIView):

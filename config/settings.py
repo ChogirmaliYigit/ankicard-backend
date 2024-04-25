@@ -72,7 +72,8 @@ MIDDLEWARE = [
     "django.middleware.clickjacking.XFrameOptionsMiddleware",
 ]
 
-CORS_ALLOWED_ORIGINS = ["https://*"]
+# CORS_ALLOWED_ORIGINS = ["*"]
+CORS_ALLOW_ALL_ORIGINS = True
 
 ROOT_URLCONF = "config.urls"
 
@@ -194,5 +195,7 @@ DRF_STANDARDIZED_ERRORS = {
 }
 
 SWAGGER_SETTINGS = {
-    "SECURITY_DEFINITIONS": {"basic": {"type": "basic"}},
+    "SECURITY_DEFINITIONS": {
+        "Token": {"type": "apiKey", "name": "Authorization", "in": "header"},
+    },
 }

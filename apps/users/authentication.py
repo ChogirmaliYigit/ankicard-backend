@@ -19,14 +19,13 @@ class CustomTokenAuthentication(TokenAuthentication):
 
         try:
             key = request.headers.get("Authorization", "").split()[-1]
-            token = CustomToken.objects.filter(
-                key=key,
-                expires_at__gte=timezone.now(),
-            ).first()
+            token = CustomToken.objects.filter(key=key).first()
         except IndexError:
             token = None
 
         if not token:
-            raise AuthenticationFailed("Token has been expired")
+            raise AuthenticationFailed("Token not provided")
+        elif token and token.expires_at < timezone.now():
+            raise AuthenticationFailed("Token")
 
         return token.user, token

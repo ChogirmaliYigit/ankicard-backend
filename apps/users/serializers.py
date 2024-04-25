@@ -1,31 +1,27 @@
-from datetime import timedelta
-
-from django.conf import settings
-from django.utils import timezone
 from rest_framework import serializers
-from users.models import CustomToken, User, Word
+from users.models import User, Word
 
 
 class UserSerializer(serializers.ModelSerializer):
     password = serializers.CharField(write_only=True)
+    token = serializers.SerializerMethodField()
 
-    def to_representation(self, instance):
-        token, created = CustomToken.objects.get_or_create(
-            defaults={
-                "user": instance,
-            },
-            expires_at=timezone.now()
-            + timedelta(days=settings.DEFAULT_TOKEN_EXPIRE_DAYS),
+    def create(self, validated_data):
+        user = User.objects.create_user(
+            full_name=validated_data.get("full_name"),
+            username=validated_data.get("username"),
+            password=validated_data.get("password"),
+            is_active=True,
+            is_staff=False,
         )
-        return {
-            "token": token.key,
-            "username": instance.username,
-            "full_name": instance.full_name,
-        }
+        return user
+
+    def get_token(self, user):
+        return user.auth_token.key
 
     class Meta:
         model = User
-        fields = ("username", "full_name", "password")
+        fields = ("username", "full_name", "password", "token")
 
 
 class WordListSerializer(serializers.ModelSerializer):
