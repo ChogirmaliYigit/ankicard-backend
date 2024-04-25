@@ -54,6 +54,7 @@ INSTALLED_APPS = [
     "rest_framework",
     "drf_standardized_errors",
     "drf_yasg",
+    "corsheaders",
     "core",
     "users",
 ]
@@ -61,6 +62,7 @@ INSTALLED_APPS = [
 AUTH_USER_MODEL = "users.User"
 
 MIDDLEWARE = [
+    "corsheaders.middleware.CorsMiddleware",
     "django.middleware.security.SecurityMiddleware",
     "django.contrib.sessions.middleware.SessionMiddleware",
     "django.middleware.common.CommonMiddleware",
@@ -69,6 +71,8 @@ MIDDLEWARE = [
     "django.contrib.messages.middleware.MessageMiddleware",
     "django.middleware.clickjacking.XFrameOptionsMiddleware",
 ]
+
+CORS_ALLOWED_ORIGINS = ["*"]
 
 ROOT_URLCONF = "config.urls"
 

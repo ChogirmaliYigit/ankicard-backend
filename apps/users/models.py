@@ -50,8 +50,10 @@ class CustomToken(Token):
 @receiver(post_save, sender=User)
 def create_auth_token(sender, instance=None, created=False, **kwargs):
     if created:
-        CustomToken.objects.create(
-            user=instance,
+        CustomToken.objects.update_or_create(
+            defaults={
+                "user": instance,
+            },
             expires_at=timezone.now()
             + timedelta(days=settings.DEFAULT_TOKEN_EXPIRE_DAYS),
         )

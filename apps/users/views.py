@@ -23,7 +23,8 @@ class UserLoginView(APIView):
 
     def post(self, request):
         user = User.objects.filter(
-            username=request.data["username"], password=request.data["password"]
+            username=request.data.get("username"),
+            password=request.data.get("password"),
         ).first()
         if user:
             token, created = CustomToken.objects.get_or_create(
