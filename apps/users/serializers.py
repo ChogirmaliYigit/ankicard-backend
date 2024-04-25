@@ -11,7 +11,9 @@ class UserSerializer(serializers.ModelSerializer):
 
     def to_representation(self, instance):
         token, created = CustomToken.objects.get_or_create(
-            user=instance,
+            defaults={
+                "user": instance,
+            },
             expires_at=timezone.now()
             + timedelta(days=settings.DEFAULT_TOKEN_EXPIRE_DAYS),
         )
