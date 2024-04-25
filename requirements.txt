@@ -8,3 +8,4 @@ python-dateutil~=2.9.0.post0
 drf-standardized-errors==0.13.0
 drf-yasg==1.21.7
 gunicorn
+django-cors-headers==4.3.1
