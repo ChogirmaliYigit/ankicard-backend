@@ -119,6 +119,7 @@ class WordListView(APIView):
                         items=openapi.Schema(
                             type=openapi.TYPE_OBJECT,
                             properties={
+                                "id": openapi.Schema(type=openapi.TYPE_INTEGER),
                                 "front": openapi.Schema(type=openapi.TYPE_STRING),
                                 "back": openapi.Schema(type=openapi.TYPE_STRING),
                                 "pronunciation": openapi.Schema(

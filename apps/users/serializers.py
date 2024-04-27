@@ -25,6 +25,7 @@ class UserSerializer(serializers.ModelSerializer):
 
 
 class WordDetailSerializer(serializers.ModelSerializer):
+    id = serializers.IntegerField(read_only=True)
     front = serializers.CharField(required=False)
     back = serializers.CharField(required=False)
     pronunciation = serializers.CharField(required=False)
@@ -33,6 +34,7 @@ class WordDetailSerializer(serializers.ModelSerializer):
     class Meta:
         model = Word
         fields = (
+            "id",
             "front",
             "back",
             "pronunciation",
@@ -45,6 +47,7 @@ class WordListSerializer(serializers.ModelSerializer):
 
     def to_representation(self, instance):
         return {
+            "id": instance.id,
             "front": instance.front,
             "back": instance.back,
             "pronunciation": instance.pronunciation,
