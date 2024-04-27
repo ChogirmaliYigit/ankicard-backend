@@ -24,28 +24,6 @@ class UserSerializer(serializers.ModelSerializer):
         fields = ("username", "full_name", "password", "token")
 
 
-class WordListSerializer(serializers.ModelSerializer):
-    def create(self, validated_data):
-        request = self.context.get("request")
-        word = Word.objects.create(
-            front=validated_data.get("front"),
-            back=validated_data.get("back"),
-            pronunciation=validated_data.get("pronunciation"),
-            is_favorite=validated_data.get("is_favorite", False),
-            user=request.user,
-        )
-        return word
-
-    class Meta:
-        model = Word
-        fields = (
-            "front",
-            "back",
-            "pronunciation",
-            "is_favorite",
-        )
-
-
 class WordDetailSerializer(serializers.ModelSerializer):
     front = serializers.CharField(required=False)
     back = serializers.CharField(required=False)
@@ -60,3 +38,40 @@ class WordDetailSerializer(serializers.ModelSerializer):
             "pronunciation",
             "is_favorite",
         )
+
+
+class WordListSerializer(serializers.ModelSerializer):
+    words = WordDetailSerializer(many=True)
+
+    def to_representation(self, instance):
+        return {
+            "front": instance.front,
+            "back": instance.back,
+            "pronunciation": instance.pronunciation,
+            "is_favorite": instance.is_favorite,
+        }
+
+    def create(self, validated_data):
+        request = self.context.get("request")
+        words = validated_data.get("words")
+        word_objects = [
+            Word(
+                front=item.get("front"),
+                back=item.get("back"),
+                pronunciation=item.get("pronunciation"),
+                is_favorite=item.get("is_favorite", False),
+                user=request.user,
+            )
+            for item in words
+        ]
+        word_ids = Word.objects.bulk_create(
+            word_objects,
+            update_conflicts=True,
+            update_fields=["front", "back", "pronunciation", "is_favorite"],
+            unique_fields=["front", "back", "pronunciation", "user"],
+        )
+        return word_ids
+
+    class Meta:
+        model = Word
+        fields = ("words",)

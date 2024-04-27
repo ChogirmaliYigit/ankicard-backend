@@ -28,19 +28,25 @@ class User(BaseModel, AbstractBaseUser, PermissionsMixin):
 
 
 class Word(BaseModel):
-    front = models.CharField(max_length=500, unique=True)
-    back = models.CharField(max_length=500, unique=True)
-    pronunciation = models.CharField(max_length=500, unique=True)
+    front = models.CharField(max_length=500)
+    back = models.CharField(max_length=500)
+    pronunciation = models.CharField(max_length=500)
     is_favorite = models.BooleanField(default=False)
     user = models.ForeignKey(User, on_delete=models.CASCADE, related_name="words")
 
     class Meta:
         db_table = "words"
+        unique_together = ("front", "back", "pronunciation", "user")
+
+
+def get_default_time():
+    return timezone.now() + timedelta(days=settings.DEFAULT_TOKEN_EXPIRE_DAYS)
 
 
 class CustomToken(Token):
     expires_at = models.DateTimeField(
-        default=timezone.now() + timedelta(days=settings.DEFAULT_TOKEN_EXPIRE_DAYS)
+        default=get_default_time,
+        editable=False,
     )
 
     class Meta:
