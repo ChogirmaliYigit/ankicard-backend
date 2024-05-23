@@ -114,52 +114,31 @@ class WordListView(APIView):
             status.HTTP_200_OK: openapi.Schema(
                 type=openapi.TYPE_OBJECT,
                 properties={
-                    "words": openapi.Schema(
-                        type=openapi.TYPE_ARRAY,
-                        items=openapi.Schema(
-                            type=openapi.TYPE_OBJECT,
-                            properties={
-                                "id": openapi.Schema(type=openapi.TYPE_INTEGER),
-                                "front": openapi.Schema(type=openapi.TYPE_STRING),
-                                "back": openapi.Schema(type=openapi.TYPE_STRING),
-                                "pronunciation": openapi.Schema(
-                                    type=openapi.TYPE_STRING
-                                ),
-                                "is_favorite": openapi.Schema(
-                                    type=openapi.TYPE_BOOLEAN
-                                ),
-                            },
-                            required=["front", "back", "pronunciation"],
-                        ),
-                    )
+                    "id": openapi.Schema(type=openapi.TYPE_INTEGER),
+                    "front": openapi.Schema(type=openapi.TYPE_STRING),
+                    "back": openapi.Schema(type=openapi.TYPE_STRING),
+                    "pronunciation": openapi.Schema(type=openapi.TYPE_STRING),
+                    "is_favorite": openapi.Schema(type=openapi.TYPE_BOOLEAN),
                 },
+                required=["front", "back", "pronunciation"],
             ),
             status.HTTP_400_BAD_REQUEST: "Invalid input",
         },
     )
     def get(self, request):
         serializer = self.serializer_class(self.get_queryset(request), many=True)
-        return Response({"words": serializer.data}, status.HTTP_200_OK)
+        return Response(serializer.data, status.HTTP_200_OK)
 
     @utils.swagger_auto_schema(
         request_body=openapi.Schema(
             type=openapi.TYPE_OBJECT,
             properties={
-                "words": openapi.Schema(
-                    type=openapi.TYPE_ARRAY,
-                    items=openapi.Schema(
-                        type=openapi.TYPE_OBJECT,
-                        properties={
-                            "front": openapi.Schema(type=openapi.TYPE_STRING),
-                            "back": openapi.Schema(type=openapi.TYPE_STRING),
-                            "pronunciation": openapi.Schema(type=openapi.TYPE_STRING),
-                            "is_favorite": openapi.Schema(type=openapi.TYPE_BOOLEAN),
-                        },
-                        required=["front", "back", "pronunciation"],
-                    ),
-                )
+                "front": openapi.Schema(type=openapi.TYPE_STRING),
+                "back": openapi.Schema(type=openapi.TYPE_STRING),
+                "pronunciation": openapi.Schema(type=openapi.TYPE_STRING),
+                "is_favorite": openapi.Schema(type=openapi.TYPE_BOOLEAN),
             },
-            required=["words"],
+            required=["front", "back", "pronunciation"],
         ),
         responses={
             status.HTTP_201_CREATED: "{}",

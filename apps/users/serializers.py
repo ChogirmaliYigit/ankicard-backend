@@ -1,3 +1,4 @@
+from django.db import transaction
 from rest_framework import serializers
 from users.models import User, Word
 
@@ -43,8 +44,6 @@ class WordDetailSerializer(serializers.ModelSerializer):
 
 
 class WordListSerializer(serializers.ModelSerializer):
-    words = WordDetailSerializer(many=True)
-
     def to_representation(self, instance):
         return {
             "id": instance.id,
@@ -56,25 +55,42 @@ class WordListSerializer(serializers.ModelSerializer):
 
     def create(self, validated_data):
         request = self.context.get("request")
-        words = validated_data.get("words")
-        word_objects = [
-            Word(
-                front=item.get("front"),
-                back=item.get("back"),
-                pronunciation=item.get("pronunciation"),
-                is_favorite=item.get("is_favorite", False),
-                user=request.user,
+        words_data = validated_data.pop("words")
+        word_objects = []
+        for item in words_data:
+            word_objects.append(
+                Word(
+                    front=item["front"],
+                    back=item["back"],
+                    pronunciation=item.get("pronunciation", ""),
+                    is_favorite=item.get("is_favorite", False),
+                    user=request.user,
+                )
             )
-            for item in words
-        ]
-        word_ids = Word.objects.bulk_create(
-            word_objects,
-            update_conflicts=True,
-            update_fields=["front", "back", "pronunciation", "is_favorite"],
-            unique_fields=["front", "back", "pronunciation", "user"],
-        )
-        return word_ids
+
+        with transaction.atomic():
+            created_words = []
+            for word in word_objects:
+                obj, created = Word.objects.get_or_create(
+                    front=word.front,
+                    back=word.back,
+                    pronunciation=word.pronunciation,
+                    user=word.user,
+                    defaults={"is_favorite": word.is_favorite},
+                )
+                if not created:
+                    obj.is_favorite = word.is_favorite
+                    obj.save()
+                created_words.append(obj)
+
+        return created_words
 
     class Meta:
         model = Word
-        fields = ("words",)
+        fields = (
+            "id",
+            "front",
+            "back",
+            "pronunciation",
+            "is_favorite",
+        )
